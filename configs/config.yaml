@@ -28,9 +28,9 @@ model:
   pretrained: true        # start from COCO pretrained weights
   num_classes: 2          # 0=background, 1=person
 
-  # RPN / detection thresholds (torchvision defaults are fine for fine-tuning)
-  min_size: 800
-  max_size: 1333
+  # RPN / detection thresholds — reduced for CPU training speed
+  min_size: 400
+  max_size: 667
 
 # ---------------------------------------------------------------------------
 # Training
@@ -39,7 +39,7 @@ training:
   device: "cuda"          # falls back to "cpu" automatically if no GPU found
   epochs: 20
   batch_size: 2           # safe for 8 GB VRAM; reduce to 1 if OOM
-  num_workers: 4          # parallel data loading workers
+  num_workers: 0          # 0 = main process only; required on Windows (spawn causes segfault)
 
   # SGD with momentum — the standard recipe for Mask R-CNN
   learning_rate: 0.005

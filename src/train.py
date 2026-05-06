@@ -170,6 +170,8 @@ def main(config_path: str = "configs/config.yaml"):
     model = get_model(
         num_classes=cfg["model"]["num_classes"],
         pretrained=cfg["model"]["pretrained"],
+        min_size=cfg["model"]["min_size"],
+        max_size=cfg["model"]["max_size"],
     )
     model.to(device)
 

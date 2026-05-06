@@ -48,7 +48,8 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 
-def get_model(num_classes: int = 2, pretrained: bool = True) -> nn.Module:
+def get_model(num_classes: int = 2, pretrained: bool = True,
+              min_size: int = 800, max_size: int = 1333) -> nn.Module:
     """
     Build and return the Mask R-CNN model ready for training or inference.
 
@@ -72,7 +73,7 @@ def get_model(num_classes: int = 2, pretrained: bool = True) -> nn.Module:
         model : fully configured Mask R-CNN ready for `.to(device)`
     """
     weights = MaskRCNN_ResNet50_FPN_Weights.DEFAULT if pretrained else None
-    model = maskrcnn_resnet50_fpn(weights=weights)
+    model = maskrcnn_resnet50_fpn(weights=weights, min_size=min_size, max_size=max_size)
 
     # --- Replace box prediction head ---
     # FastRCNNPredictor is a two-FC-layer head: it takes the per-ROI feature

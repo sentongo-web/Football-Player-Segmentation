@@ -1,0 +1,82 @@
+# =============================================================================
+# Football Player Segmentation — Training Configuration
+# =============================================================================
+# All hyperparameters live here so experiments are reproducible without
+# touching source code. Change values here, not in the scripts.
+
+# ---------------------------------------------------------------------------
+# Data
+# ---------------------------------------------------------------------------
+data:
+  raw_dir: "data/raw"
+  splits_dir: "data/splits"
+  images_dir: "data/raw/images"
+  annotation_file: "data/raw/annotations/instances_default.json"
+
+  # Split ratios must sum to 1.0
+  train_ratio: 0.80   # 410 images
+  val_ratio:   0.10   #  51 images (used during training to pick best checkpoint)
+  test_ratio:  0.10   #  51 images (held out, evaluated once at the end)
+
+  seed: 42            # keeps splits deterministic across runs
+
+# ---------------------------------------------------------------------------
+# Model
+# ---------------------------------------------------------------------------
+model:
+  name: "maskrcnn_resnet50_fpn"
+  pretrained: true        # start from COCO pretrained weights
+  num_classes: 2          # 0=background, 1=person
+
+  # RPN / detection thresholds (torchvision defaults are fine for fine-tuning)
+  min_size: 800
+  max_size: 1333
+
+# ---------------------------------------------------------------------------
+# Training
+# ---------------------------------------------------------------------------
+training:
+  device: "cuda"          # falls back to "cpu" automatically if no GPU found
+  epochs: 20
+  batch_size: 2           # safe for 8 GB VRAM; reduce to 1 if OOM
+  num_workers: 4          # parallel data loading workers
+
+  # SGD with momentum — the standard recipe for Mask R-CNN
+  learning_rate: 0.005
+  momentum: 0.9
+  weight_decay: 0.0005
+
+  # LR schedule: drop by gamma every step_size epochs
+  lr_step_size: 10
+  lr_gamma: 0.1
+
+  # Gradient clipping prevents occasional loss spikes early in training
+  clip_grad_norm: 1.0
+
+# ---------------------------------------------------------------------------
+# Augmentation  (applied only during training)
+# ---------------------------------------------------------------------------
+augmentation:
+  horizontal_flip_prob: 0.5   # most impactful single augmentation for sports footage
+  color_jitter:
+    brightness: 0.2
+    contrast: 0.2
+    saturation: 0.2
+    hue: 0.05
+
+# ---------------------------------------------------------------------------
+# Output
+# ---------------------------------------------------------------------------
+output:
+  checkpoint_dir: "outputs/checkpoints"
+  log_dir: "outputs/logs"
+  visualization_dir: "outputs/visualizations"
+  save_every: 5           # save a checkpoint every N epochs
+
+# ---------------------------------------------------------------------------
+# Inference
+# ---------------------------------------------------------------------------
+inference:
+  score_threshold: 0.50   # discard detections below this confidence
+  nms_threshold: 0.50     # non-maximum suppression IoU threshold
+  top_k: 100              # max detections per image
